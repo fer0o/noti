@@ -39,6 +39,10 @@ function App() {
 
   const handleButtonClick = () => {
     setSeconds(20);
+    toast.success('Notificación enviada', {
+      duration: 2000,
+      position: 'top-right',
+    });
   };
 
   return (

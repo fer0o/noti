@@ -1,28 +1,44 @@
+import React, { useState, useEffect } from 'react';
 import logo from './logo.svg';
 import './App.css';
-import { useEffect } from 'react';
 import { generateToken } from './notifications/firebase';
 import toast, { Toaster } from 'react-hot-toast';
 
 function App() {
+  const [seconds, setSeconds] = useState(null);
+
   useEffect(() => {
     generateToken();
   }, []);
 
-  const handleNotification = () => {
-    setTimeout(() => {
-      const notificationTitle = "Descarga completa";
-      const notificationOptions = {
-        body: "La descarga ha sido completada",
-        icon: logo // Opcional, puedes especificar una ruta a un icono
-      };
+  useEffect(() => {
+    let interval;
+    if (seconds !== null && seconds > 0) {
+      interval = setInterval(() => {
+        setSeconds(prevSeconds => prevSeconds - 1);
+      }, 1000);
+    } else if (seconds === 0) {
+      handleNotification();
+    }
+    return () => clearInterval(interval);
+  }, [seconds]);
 
-      if (Notification.permission === "granted") {
-        new Notification(notificationTitle, notificationOptions);
-      } else {
-        toast("Permiso de notificación no concedido.");
-      }
-    }, 20000); // 20000 milisegundos = 20 segundos
+  const handleNotification = () => {
+    const notificationTitle = "Descarga completa";
+    const notificationOptions = {
+      body: "La descarga ha sido completada",
+      icon: logo // Opcional, puedes especificar una ruta a un icono
+    };
+
+    if (Notification.permission === "granted") {
+      new Notification(notificationTitle, notificationOptions);
+    } else {
+      toast("Permiso de notificación no concedido.");
+    }
+  };
+
+  const handleButtonClick = () => {
+    setSeconds(20);
   };
 
   return (
@@ -41,7 +57,8 @@ function App() {
         >
           Learn React
         </a>
-        <button onClick={handleNotification}>Iniciar Descarga</button>
+        <button onClick={handleButtonClick}>Iniciar Descarga</button>
+        {seconds !== null && <h2>Contador: {seconds} segundos</h2>}
       </header>
     </div>
   );
